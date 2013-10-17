@@ -49,11 +49,6 @@ void process(FILE* handle) {
 			byteswritten = 0;
 			blockswritten = 0;
 		}
-//		printf("0x%x\n", *p);		
 	}
-}
-
-void dumpfit(FILE* handle, FILE* target) {
-
 }
 
