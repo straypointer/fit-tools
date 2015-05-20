@@ -1,0 +1,33 @@
+
+How I Repaired Garmin .FIT File:
+
+install software noted here (scalpel, fitdump, Garmin::FIT):
+http://www.thice.nl/recovering-data-from-garmin-edge500/
+
+
+0 - before doing any more rides, create image of Garmin (e.g. "sudo dd if=/dev/drive1 of=garmin.img bs=1024")
+1 - found undelete utility (testdisk for OS X)
+2 - undeleted garbage file in /Garmin/NewFiles that corresponded to the correct date;
+	other places to look, /Garmin/Activities
+	...note that your data may be scattered across the file system, searching by time is best, unless location is unique
+	...some/all of your data may be gone/overwritten by the Garmin when it restarted
+3 - determined location of date value in data record (a location packet starts with 0x06)
+4 - verified date against what I expected (# of seconds since 01-01-2000?), including a byteswap
+5 - created a new 'donor' file using a valid ride under the same approximate conditions (ANT+ HR, but no PM, same apx. location, etc.)
+6 - downloaded a hex editor (e.g. Hex Fiend for OS X)
+7 - created a new empty file
+8 - copied the donor header records (using fitdump to determine all of them before the 0x06 packets start) into the new file
+9 - replace ALL timestamps with that of the first valid 0x06 record in the corrupt file
+10 - copy-paste all the valid data from the corrupt file, noting that the footer is probably corrupt/missing also
+11 - verify footer against the donor file, the checksum may not matter when uploading to Strava
+12 - run fitdump against new file, verify it all processes
+13 - if not, find byte offset where record fails by using timestamp, remove offending record
+14 - repeat steps 11-13 as necessary ... fitdump does not seem to understand 0x07 records which may be the 'lap' keypress, Strava might not trip up on these
+12 - cross fingers, upload to Strava
+
+
+NOTES:
+
+- all byte values are stored big-endian and must be byteswapped when reading/writing as appropriate
+- all 0x06 records are 23 bytes long
+
